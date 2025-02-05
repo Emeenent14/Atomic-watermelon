@@ -68,6 +68,8 @@ const emojimixCommand = require('./commands/emojimix');
 const { handlePromotionEvent } = require('./commands/promote');
 const { handleDemotionEvent } = require('./commands/demote');
 const viewOnceCommand = require('./commands/viewonce');
+const clearSessionCommand = require('./commands/clearsession');
+const { autoStatusCommand, handleStatusUpdate } = require('./commands/autostatus');
 
 // Global settings
 global.packname = settings.packname;
@@ -104,10 +106,15 @@ async function handleMessages(sock, messageUpdate, printLog) {
             message.message?.extendedTextMessage?.text?.trim().toLowerCase() || '';
         userMessage = userMessage.replace(/\.\s+/g, '.').trim();
 
+        // Only log command usage
+        if (userMessage.startsWith('.')) {
+            console.log(`📝 Command used in ${isGroup ? 'group' : 'private'}: ${userMessage}`);
+        }
+
         // Check if user is banned (skip ban check for unban command)
         if (isBanned(senderId) && !userMessage.startsWith('.unban')) {
             // Only respond occasionally to avoid spam
-            if (Math.random() < 0.1) { // 10% chance to respond
+            if (Math.random() < 0.1) { 
                 await sock.sendMessage(chatId, { 
                     text: '❌ You are banned from using the bot. Contact an admin to get unbanned.',
                     ...channelInfo
@@ -622,6 +629,13 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage === '.vv':
                 await viewOnceCommand(sock, chatId, message);
                 break;
+            case userMessage === '.clearsession' || userMessage === '.clearsesi':
+                await clearSessionCommand(sock, chatId, senderId);
+                break;
+            case userMessage.startsWith('.autostatus'):
+                const autoStatusArgs = userMessage.split(' ').slice(1);
+                await autoStatusCommand(sock, chatId, senderId, autoStatusArgs);
+                break;
             default:
                 if (isGroup) {
                     // Handle non-command group messages
@@ -634,7 +648,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 break;
         }
     } catch (error) {
-        console.error('Error in message handler:', error);
+        console.error('❌ Error in message handler:', error.message);
         // Only try to send error message if we have a valid chatId
         if (chatId) {
             await sock.sendMessage(chatId, { 
@@ -662,5 +676,8 @@ module.exports = {
         } else if (action === 'demote') {
             await handleDemotionEvent(sock, id, participants, author);
         }
+    },
+    handleStatus: async (sock, status) => {
+        await handleStatusUpdate(sock, status);
     }
 };
