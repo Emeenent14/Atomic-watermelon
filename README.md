@@ -42,7 +42,7 @@ Deploy the bot and easily connect it to your WhatsApp account by pair code. Clic
 
 <div align="center">
   <a href="https://knight-bot-paircode.onrender.com">
-    <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Click%20Here-ff4d4d?style=for-the-badge" alt="Generate Pair Code"/>
+    <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Easy%20Method-ff4d4d?style=for-the-badge" alt="Generate Pair Code"/>
   </a>
 </div>
 
