@@ -16,7 +16,7 @@ This is a WhatsApp bot built using the Baileys library for group management, inc
 
 ---
 
-## 🚀 Steps to Deploy
+## 🚀 Steps to Deploy Bot
 
 ### Step 1: Fork the Repository
 
