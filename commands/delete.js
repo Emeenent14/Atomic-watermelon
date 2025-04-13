@@ -1,4 +1,4 @@
-const isAdmin = require('../helpers/isAdmin');
+const isAdmin = require('../lib/isAdmin');
 
 async function deleteCommand(sock, chatId, message, senderId) {
     const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);

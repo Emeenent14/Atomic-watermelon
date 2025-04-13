@@ -16,7 +16,7 @@ This is a WhatsApp bot built using the Baileys library for group management, inc
 
 ---
 
-## 🚀 Steps to Deploy Bot
+## 🚀 Steps to Deploy
 
 ### Step 1: Fork the Repository
 
@@ -37,6 +37,12 @@ Deploy the bot and easily connect it to your WhatsApp account by pair code. Clic
 <div align="center">
   <a href="https://replit.com/@DGXeon/Xeon-PairCode?v=1">
     <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Replit-success?style=for-the-badge" alt="Deploy on Replit"/>
+  </a>
+</div>
+
+<div align="center">
+  <a href="https://knight-bot-paircode.onrender.com">
+    <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Easy%Method-success?style=for-the-badge" alt="Deploy on Replit"/>
   </a>
 </div>
 

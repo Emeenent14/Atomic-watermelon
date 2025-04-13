@@ -1,4 +1,4 @@
-const isAdmin = require('../helpers/isAdmin');
+const isAdmin = require('../lib/isAdmin');
 
 async function kickCommand(sock, chatId, senderId, mentionedJids, message) {
     const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);

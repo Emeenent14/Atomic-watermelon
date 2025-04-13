@@ -1,4 +1,4 @@
-const isAdmin = require('../helpers/isAdmin');
+const isAdmin = require('../lib/isAdmin');
 
 async function muteCommand(sock, chatId, senderId, durationInMinutes) {
     console.log(`Attempting to mute the group for ${durationInMinutes} minutes.`); // Log for debugging

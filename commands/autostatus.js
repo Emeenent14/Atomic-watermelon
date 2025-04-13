@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const isOwner = require('../helpers/isOwner');
+const isOwner = require('../lib/isOwner');
 
 const channelInfo = {
     contextInfo: {
@@ -93,7 +93,6 @@ function isAutoStatusEnabled() {
 async function handleStatusUpdate(sock, status) {
     try {
         if (!isAutoStatusEnabled()) {
-            console.log('❌ Auto status view is disabled');
             return;
         }
 

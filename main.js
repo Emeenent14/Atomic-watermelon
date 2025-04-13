@@ -1,5 +1,4 @@
 const settings = require('./settings');
-const { loadCommands } = require('./utils');
 require('./config.js');
 const { isBanned } = require('./lib/isBanned');
 const yts = require('youtube-yts');
@@ -17,7 +16,7 @@ const { demoteCommand } = require('./commands/demote');
 const muteCommand = require('./commands/mute');
 const unmuteCommand = require('./commands/unmute');
 const stickerCommand = require('./commands/sticker');
-const isAdmin = require('./helpers/isAdmin');
+const isAdmin = require('./lib/isAdmin');
 const warnCommand = require('./commands/warn');
 const warningsCommand = require('./commands/warnings');
 const ttsCommand = require('./commands/tts');
