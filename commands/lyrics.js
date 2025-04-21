@@ -1,36 +1,49 @@
 const fetch = require('node-fetch');
-require('../config.js');
 
 async function lyricsCommand(sock, chatId, songTitle) {
     if (!songTitle) {
         await sock.sendMessage(chatId, { 
-            text: '❌ Please provide a song title!' 
+            text: '🔍 Please enter the song name to get the lyrics! Usage: *lyrics <song name>*',
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363161513685998@newsletter',
+                    newsletterName: 'KnightBot MD',
+                    serverMessageId: -1
+                }
+            }
         });
         return;
     }
 
     try {
-        // Using xteam API instead of lolhuman
-        const apiUrl = `${global.APIs.xteam}/api/lirik?q=${encodeURIComponent(songTitle)}&apikey=${global.APIKeys['https://api.xteam.xyz']}`;
+        // Fetch song lyrics using the API
+        let res = await fetch(`https://some-random-api.com/lyrics?title=${encodeURIComponent(songTitle)}`);
+        if (!res.ok) throw await res.text();
         
-        const res = await fetch(apiUrl);
-        const json = await res.json();
+        let json = await res.json();
         
-        if (!json.result) {
+        if (!json.thumbnail.genius) {
             await sock.sendMessage(chatId, { 
-                text: '❌ Lyrics not found for this song!' 
+                text: '❌ Sorry, I couldn\'t find any lyrics for this song!',
+                contextInfo: {
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363161513685998@newsletter',
+                        newsletterName: 'KnightBot MD',
+                        serverMessageId: -1
+                    }
+                }
             });
             return;
         }
-
-        const lyricsText = `*🎵 ${songTitle}*
-
-${json.result}
-
-_Powered by XTeam API_`;
-
+        
+        // Sending the formatted result to the user
         await sock.sendMessage(chatId, {
-            text: lyricsText,
+            image: { url: json.thumbnail.genius },
+            caption: `🎵 *Song Lyrics* 🎶\n\n▢ *Title:* ${json.title}\n*Artist:* ${json.author}\n\n📜 *Lyrics:*\n${json.lyrics}\n\nHope you enjoy the music! 🎧 🎶`,
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
@@ -45,7 +58,16 @@ _Powered by XTeam API_`;
     } catch (error) {
         console.error('Error in lyrics command:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ The lyrics service is currently unavailable. Please try again later.' 
+            text: '❌ Sorry, I couldn\'t fetch the lyrics. Please try again later!',
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363161513685998@newsletter',
+                    newsletterName: 'KnightBot MD',
+                    serverMessageId: -1
+                }
+            }
         });
     }
 }
