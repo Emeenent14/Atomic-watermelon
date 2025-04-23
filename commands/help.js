@@ -39,6 +39,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .blur <image>
 ║ ➤ .simage <reply to sticker>
 ║ ➤ .sticker <reply to image>
+║ ➤ .tgsticker <Link>
 ║ ➤ .meme
 ║ ➤ .take <packname> 
 ║ ➤ .emojimix <emj1>+<emj2>
