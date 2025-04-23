@@ -69,6 +69,10 @@ const { handleDemotionEvent } = require('./commands/demote');
 const viewOnceCommand = require('./commands/viewonce');
 const clearSessionCommand = require('./commands/clearsession');
 const { autoStatusCommand, handleStatusUpdate } = require('./commands/autostatus');
+const { simpCommand } = require('./commands/simp');
+const { stupidCommand } = require('./commands/stupid');
+const pairCommand = require('./commands/pair');
+const stickerTelegramCommand = require('./commands/stickertelegram');
 
 // Global settings
 global.packname = settings.packname;
@@ -413,6 +417,17 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 const songTitle = userMessage.split(' ').slice(1).join(' ');
                 await lyricsCommand(sock, chatId, songTitle);
                 break;
+            case userMessage.startsWith('.simp'):
+                const quotedMsg = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+                const mentionedJid = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+                await simpCommand(sock, chatId, quotedMsg, mentionedJid, senderId);
+                break;
+            case userMessage.startsWith('.stupid') || userMessage.startsWith('.itssostupid') || userMessage.startsWith('.iss'):
+                const stupidQuotedMsg = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+                const stupidMentionedJid = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+                const stupidArgs = userMessage.split(' ').slice(1);
+                await stupidCommand(sock, chatId, stupidQuotedMsg, stupidMentionedJid, senderId, stupidArgs);
+                break;
             case userMessage === '.dare':
                 await dareCommand(sock, chatId);
                 break;
@@ -558,6 +573,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage.startsWith('.emojimix') || userMessage.startsWith('.emix'):
                 await emojimixCommand(sock, chatId, message);
                 break;
+                case userMessage.startsWith('.tg') || userMessage.startsWith('.stickertelegram') || userMessage.startsWith('.tgsticker') || userMessage.startsWith('.telesticker'):
+        
+                await stickerTelegramCommand(sock, chatId, message);
+                break;
             case userMessage.startsWith('.play') || userMessage.startsWith('.song'):
                 try {
                     const text = userMessage.split(' ').slice(1).join(' ');
@@ -635,6 +654,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 const autoStatusArgs = userMessage.split(' ').slice(1);
                 await autoStatusCommand(sock, chatId, senderId, autoStatusArgs);
                 break;
+            case userMessage.startsWith('.simp'):
+                await simpCommand(sock, chatId, message);
+                break;
+                case userMessage.startsWith('.pair') || userMessage.startsWith('.rent'): {
+                    const q = userMessage.split(' ').slice(1).join(' ');
+                    await pairCommand(sock, chatId, message, q);
+                    break;
+                }
             default:
                 if (isGroup) {
                     // Handle non-command group messages

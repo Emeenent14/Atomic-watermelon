@@ -31,6 +31,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .groupinfo
 ║ ➤ .staff or .admins 
 ║ ➤ .vv
+║ ➤ .pair or .rent
 ╚═══════════════════╝
 
 ╔═══════════════════╗
@@ -98,6 +99,8 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .character @user
 ║ ➤ .wasted @user
 ║ ➤ .ship @user
+║ ➤ .simp @user
+║ ➤ .stupid @user [text]
 ╚═══════════════════╝
 
 ╔═══════════════════╗
