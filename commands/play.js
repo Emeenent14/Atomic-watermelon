@@ -70,3 +70,6 @@ module.exports = {
         }
     }
 }; 
+
+/*Powered by KNIGHT-BOT*
+*Credits to Keith MD*`*/
