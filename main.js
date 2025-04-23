@@ -1,11 +1,14 @@
 const settings = require('./settings');
 require('./config.js');
 const { isBanned } = require('./lib/isBanned');
-const yts = require('youtube-yts');
+const yts = require('yt-search');
 const { fetchBuffer } = require('./lib/myfunc');
-const ytdl = require('./lib/ytdl2');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const ytdl = require('ytdl-core');
+const path = require('path');
+const axios = require('axios');
+const ffmpeg = require('fluent-ffmpeg');
 
 // Command imports
 const tagAllCommand = require('./commands/tagall');
@@ -583,15 +586,16 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     const text = userMessage.split(' ').slice(1).join(' ');
                     if (!text) {
                         await sock.sendMessage(chatId, { 
-                            text: `❌ Please provide a search term!\n\nExample: .play harleys in hawaii`,
+                            text: `❌ Please specify the song you want to download!\n\nExample: .play Sia Unstoppable`,
                             ...channelInfo
                         });
                         return;
                     }
 
-                    // Search for the video
+                 
+
                     const search = await yts(text);
-                    if (!search.videos.length) {
+                    if (!search.all || search.all.length === 0) {
                         await sock.sendMessage(chatId, { 
                             text: '❌ No results found!',
                             ...channelInfo
@@ -599,48 +603,59 @@ async function handleMessages(sock, messageUpdate, printLog) {
                         return;
                     }
 
-                    const video = search.videos[0];
-                    
-                    // Send processing message
-                    await sock.sendMessage(chatId, { 
-                        text: `🎵 Downloading: ${video.title}\n⏳ Please wait...`,
-                        ...channelInfo
-                    });
+                    const video = search.all[0];
+                    const link = video.url;
 
-                    // Download and process audio
-                    const audioData = await ytdl.mp3(video.url);
+                    // Generate the API URL
+                    const apiUrl = `https://apis-keith.vercel.app/download/dlmp3?url=${link}`;
 
-                    // Get thumbnail
-                    const response = await fetch(video.thumbnail);
-                    const thumbBuffer = await response.buffer();
-
-                    // Send the audio
-                    await sock.sendMessage(chatId, {
-                        audio: fs.readFileSync(audioData.path),
-                        mimetype: 'audio/mp4',
-                        fileName: `${video.title}.mp3`,
-                        contextInfo: {
-                            externalAdReply: {
-                                title: video.title,
-                                body: global.botname,
-                                thumbnail: thumbBuffer,
-                                mediaType: 2,
-                                mediaUrl: video.url,
-                            }
-                        }
-                    });
-
-                    // Cleanup
-                    try {
-                        fs.unlinkSync(audioData.path);
-                    } catch (err) {
-                        console.error('Error cleaning up audio file:', err);
+                    // Fetch the audio data from the API
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        await sock.sendMessage(chatId, { 
+                            text: '❌ Failed to fetch data from the API. Please try again.',
+                            ...channelInfo
+                        });
+                        return;
                     }
 
+                    const data = await response.json();
+
+                    if (data.status && data.result) {
+                        const { title, downloadUrl, format, quality } = data.result;
+                        const thumbnail = video.thumbnail;
+
+                        // Send a message with song details and thumbnail
+                        await sock.sendMessage(chatId, {
+                            image: { url: thumbnail },
+                            caption: `
+╭═════════════════⊷
+║ *Title*: ${title}
+║ *Format*: ${format}
+║ *Quality*: ${quality}
+╰═════════════════⊷
+*Powered by KNIGHT-BOT*`,
+                            ...channelInfo
+                        });
+
+                        // Send the audio file
+                        await sock.sendMessage(chatId, {
+                            audio: { url: downloadUrl },
+                            mimetype: "audio/mp4",
+                            ...channelInfo
+                        });
+
+                    
+
+                    } else {
+                        await sock.sendMessage(chatId, { 
+                            text: '❌ Unable to fetch the song. Please try again later.',
+                            ...channelInfo
+                        });
+                    }
                 } catch (error) {
-                    console.error('Error in play command:', error);
                     await sock.sendMessage(chatId, { 
-                        text: '❌ Failed to play audio! Try again later.',
+                        text: `❌ An error occurred: ${error.message}`,
                         ...channelInfo
                     });
                 }
