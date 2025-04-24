@@ -136,14 +136,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
             return;
         }
 
-        // Basic message response in private chat
+      /*  // Basic message response in private chat
         if (!isGroup && (userMessage === 'hi' || userMessage === 'hello' || userMessage === 'bot' || userMessage === 'hlo' || userMessage === 'hey' || userMessage === 'bro')) {
             await sock.sendMessage(chatId, {
                 text: 'Hi, How can I help you?\nYou can use .menu for more info and commands.',
                 ...channelInfo
             });
             return;
-        }
+        } */
 
         if (!message.key.fromMe) incrementMessageCount(chatId, senderId);
 
@@ -581,12 +581,12 @@ async function handleMessages(sock, messageUpdate, printLog) {
         
                 await stickerTelegramCommand(sock, chatId, message);
                 break;
-            case userMessage.startsWith('.play') || userMessage.startsWith('.song'):
+            case userMessage.startsWith('.play') || userMessage.startsWith('.song') || userMessage.startsWith('.mp3') || userMessage.startsWith('.ytmp3') || userMessage.startsWith('.yts'):
                 try {
                     const text = userMessage.split(' ').slice(1).join(' ');
                     if (!text) {
                         await sock.sendMessage(chatId, { 
-                            text: `❌ Please specify the song you want to download!\n\nExample: .play Sia Unstoppable`,
+                            text: `✅ Please specify the song you want to download!\n\nExample: .play Sia Unstoppable`,
                             ...channelInfo
                         });
                         return;
