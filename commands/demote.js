@@ -1,4 +1,4 @@
-const { isAdmin } = require('../lib/isAdmin');
+const isAdmin = require('../lib/isAdmin');
 
 async function demoteCommand(sock, chatId, mentionedJids, message) {
     try {
@@ -12,16 +12,16 @@ async function demoteCommand(sock, chatId, mentionedJids, message) {
 
         // Check admin status first, before any other operations
         try {
-            const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, message.key.participant || message.key.remoteJid);
+            const adminStatus = await isAdmin(sock, chatId, message.key.participant || message.key.remoteJid);
             
-            if (!isBotAdmin) {
+            if (!adminStatus.isBotAdmin) {
                 await sock.sendMessage(chatId, { 
                     text: '❌ Error: Please make the bot an admin first to use this command.'
                 });
                 return;
             }
 
-            if (!isSenderAdmin) {
+            if (!adminStatus.isSenderAdmin) {
                 await sock.sendMessage(chatId, { 
                     text: '❌ Error: Only group admins can use the demote command.'
                 });
