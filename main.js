@@ -631,18 +631,15 @@ async function handleMessages(sock, messageUpdate, printLog) {
                             caption: `
 ╭═════════════════⊷
 ║ *Title*: ${title}
-║ *Format*: ${format}
-║ *Quality*: ${quality}
 ╰═════════════════⊷
-*Powered by KNIGHT-BOT*`,
+*🎵 Downloading song...*`,
                             ...channelInfo
                         });
 
                         // Send the audio file
                         await sock.sendMessage(chatId, {
                             audio: { url: downloadUrl },
-                            mimetype: "audio/mp4",
-                            ...channelInfo
+                            mimetype: "audio/mp4"
                         });
 
                     
