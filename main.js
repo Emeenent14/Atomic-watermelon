@@ -757,12 +757,12 @@ module.exports = {
     handleMessages,
     handleGroupParticipantUpdate: async (sock, update) => {
         const { id, participants, action, author } = update;
-        console.log('Group Update in Main:', {
+      /*  console.log('Group Update in Main:', {
             id,
             participants,
             action,
             author
-        });  // Add this debug log
+        }); */ // Add this debug log
         
         if (action === 'promote') {
             await handlePromotionEvent(sock, id, participants, author);

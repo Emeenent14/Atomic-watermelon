@@ -244,7 +244,7 @@ async function startXeonBotInc() {
     
     // Modify the event listener to log the update object
     XeonBotInc.ev.on('group-participants.update', async (update) => {
-        console.log('Group Update Event:', JSON.stringify(update, null, 2));  // Add this line to debug
+        //console.log('Group Update Event:', JSON.stringify(update, null, 2));  // Add this line to debug
         await handleGroupParticipantUpdate(XeonBotInc, update);
     });
 
