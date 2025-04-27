@@ -3,35 +3,10 @@ const os = require('os');
 async function pingCommand(sock, chatId) {
     try {
         const start = Date.now();
-        
-        // Get system info
-        const uptime = process.uptime();
-        const ram = (os.totalmem() - os.freemem()) / (1024 * 1024 * 1024);
-        const platform = os.platform();
-        
-        // Calculate ping
-        await sock.sendMessage(chatId, { text: '📊 *Calculating...*' });
+        await new Promise(resolve => setTimeout(resolve, 100));
         const end = Date.now();
-        const ping = end - start;
-
-        const message = `*🤖 Bot Status*\n\n` +
-                       `*⚡ Response Time:* ${ping}ms\n` +
-                       `*💻 Platform:* ${platform}\n` +
-                       `*🔄 Uptime:* ${formatTime(uptime)}\n` +
-                       `*💾 RAM Usage:* ${ram.toFixed(2)}GB`;
-
-        await sock.sendMessage(chatId, {
-            text: message,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363161513685998@newsletter',
-                    newsletterName: 'KnightBot MD',
-                    serverMessageId: -1
-                }
-            }
-        });
+        const ping = Math.round(end - start);
+        await sock.sendMessage(chatId, { text: `𝗣𝗼𝗻𝗴\n${ping} 𝗠𝘀` });
     } catch (error) {
         console.error('Error in ping command:', error);
         await sock.sendMessage(chatId, { text: 'Failed to get ping status.' });
