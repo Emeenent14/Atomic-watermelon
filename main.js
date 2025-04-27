@@ -745,6 +745,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 const antideleteMatch = userMessage.slice(11).trim();
                 await handleAntideleteCommand(sock, chatId, message, antideleteMatch);
                 break;
+            case userMessage === '.surrender':
+                // Handle surrender command for tictactoe game
+                await handleTicTacToeMove(sock, chatId, senderId, 'surrender');
+                break;
             default:
                 if (isGroup) {
                     // Handle non-command group messages

@@ -106,13 +106,12 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
         
         if (!isSurrender && !/^[1-9]$/.test(text)) return;
 
-        if (senderId !== room.game.currentTurn) {
-            if (!isSurrender) {
-                await sock.sendMessage(chatId, { 
-                    text: '❌ Not your turn!' 
-                });
-                return;
-            }
+        // Allow surrender at any time, not just during player's turn
+        if (senderId !== room.game.currentTurn && !isSurrender) {
+            await sock.sendMessage(chatId, { 
+                text: '❌ Not your turn!' 
+            });
+            return;
         }
 
         let ok = isSurrender ? true : room.game.turn(
@@ -145,15 +144,23 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
         }[v]));
 
         if (isSurrender) {
-            room.game._currentTurn = senderId === room.game.playerX;
-            winner = room.game.currentTurn;
+            // Set the winner to the opponent of the surrendering player
+            winner = senderId === room.game.playerX ? room.game.playerO : room.game.playerX;
+            
+            // Send a surrender message
+            await sock.sendMessage(chatId, { 
+                text: `🏳️ @${senderId.split('@')[0]} has surrendered! @${winner.split('@')[0]} wins the game!`,
+                mentions: [senderId, winner]
+            });
+            
+            // Delete the game immediately after surrender
+            delete games[room.id];
+            return;
         }
 
         let gameStatus;
         if (winner) {
-            gameStatus = isSurrender 
-                ? `🏳️ @${winner.split('@')[0]} wins by surrender!`
-                : `🎉 @${winner.split('@')[0]} wins the game!`;
+            gameStatus = `🎉 @${winner.split('@')[0]} wins the game!`;
         } else if (isTie) {
             gameStatus = `🤝 Game ended in a draw!`;
         } else {
