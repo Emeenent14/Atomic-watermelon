@@ -6,6 +6,8 @@ const path = require('path');
 const sharp = require('sharp');
 const webp = require('node-webpmux');
 const crypto = require('crypto');
+const { exec } = require('child_process');
+const settings = require('../settings');
 
 async function stickerTelegramCommand(sock, chatId, msg) {
     try {
@@ -74,7 +76,8 @@ async function stickerTelegramCommand(sock, chatId, msg) {
             let successCount = 0;
             for (let i = 0; i < stickerSet.result.stickers.length; i++) {
                 try {
-                    const fileId = stickerSet.result.stickers[i].file_id;
+                    const sticker = stickerSet.result.stickers[i];
+                    const fileId = sticker.file_id;
                     
                     // Get file path
                     const fileInfo = await fetch(
@@ -91,14 +94,32 @@ async function stickerTelegramCommand(sock, chatId, msg) {
                     const imageResponse = await fetch(fileUrl);
                     const imageBuffer = await imageResponse.buffer();
 
-                    // Convert to WebP using sharp
-                    const webpBuffer = await sharp(imageBuffer)
-                        .resize(512, 512, { 
-                            fit: 'contain', 
-                            background: { r: 0, g: 0, b: 0, alpha: 0 } 
-                        })
-                        .webp()
-                        .toBuffer();
+                    // Generate temp file paths
+                    const tempInput = path.join(tmpDir, `temp_${Date.now()}_${i}`);
+                    const tempOutput = path.join(tmpDir, `sticker_${Date.now()}_${i}.webp`);
+
+                    // Write media to temp file
+                    fs.writeFileSync(tempInput, imageBuffer);
+
+                    // Check if sticker is animated or video
+                    const isAnimated = sticker.is_animated || sticker.is_video;
+                    
+                    // Convert to WebP using ffmpeg with optimized settings
+                    const ffmpegCommand = isAnimated
+                        ? `ffmpeg -i "${tempInput}" -vf "scale=512:512:force_original_aspect_ratio=decrease,fps=15,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000" -c:v libwebp -preset default -loop 0 -vsync 0 -pix_fmt yuva420p -quality 75 -compression_level 6 "${tempOutput}"`
+                        : `ffmpeg -i "${tempInput}" -vf "scale=512:512:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000" -c:v libwebp -preset default -loop 0 -vsync 0 -pix_fmt yuva420p -quality 75 -compression_level 6 "${tempOutput}"`;
+
+                    await new Promise((resolve, reject) => {
+                        exec(ffmpegCommand, (error) => {
+                            if (error) {
+                                console.error('FFmpeg error:', error);
+                                reject(error);
+                            } else resolve();
+                        });
+                    });
+
+                    // Read the WebP file
+                    const webpBuffer = fs.readFileSync(tempOutput);
 
                     // Add metadata using webpmux
                     const img = new webp.Image();
@@ -107,9 +128,8 @@ async function stickerTelegramCommand(sock, chatId, msg) {
                     // Create metadata
                     const metadata = {
                         'sticker-pack-id': crypto.randomBytes(32).toString('hex'),
-                        'sticker-pack-name': global.packname || 'WhatsApp Bot',
-                        'sticker-pack-publisher': global.author || '@bot',
-                        'emojis': ['🤖']
+                        'sticker-pack-name': settings.packname,
+                        'emojis': sticker.emoji ? [sticker.emoji] : ['🤖']
                     };
 
                     // Create exif buffer
@@ -124,13 +144,21 @@ async function stickerTelegramCommand(sock, chatId, msg) {
                     // Get the final buffer
                     const finalBuffer = await img.save(null);
 
-                    // Send sticker without reply or mention
+                    // Send sticker only once
                     await sock.sendMessage(chatId, { 
                         sticker: finalBuffer 
                     });
 
                     successCount++;
                     await delay(1000); // Reduced delay
+
+                    // Cleanup temp files
+                    try {
+                        fs.unlinkSync(tempInput);
+                        fs.unlinkSync(tempOutput);
+                    } catch (err) {
+                        console.error('Error cleaning up temp files:', err);
+                    }
 
                 } catch (err) {
                     console.error(`Error processing sticker ${i}:`, err);

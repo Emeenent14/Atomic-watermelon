@@ -15,8 +15,7 @@ async function takeCommand(sock, chatId, message, args) {
         }
 
         // Get the packname from args or use default
-        const packname = args.join(' ') || 'KnightBot';
-        const author = 'Bot';
+        const packname = args.join(' ') || 'Knight Bot';
 
         try {
             // Create tmp directory if it doesn't exist
@@ -59,7 +58,6 @@ async function takeCommand(sock, chatId, message, args) {
             const json = {
                 'sticker-pack-id': crypto.randomBytes(32).toString('hex'),
                 'sticker-pack-name': packname,
-                'sticker-pack-publisher': author,
                 'emojis': ['🤖']
             };
 
