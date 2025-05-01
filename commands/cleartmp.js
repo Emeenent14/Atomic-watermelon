@@ -78,7 +78,7 @@ async function clearTmpCommand(sock, chatId, msg) {
     }
 }
 
-// Start automatic clearing every 3 hours
+// Start automatic clearing every 6 hours
 function startAutoClear() {
     // Run immediately on startup
     clearTmpDirectory().then(result => {
