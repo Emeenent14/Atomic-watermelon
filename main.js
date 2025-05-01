@@ -79,6 +79,7 @@ const stickerTelegramCommand = require('./commands/stickertelegram');
 const textmakerCommand = require('./commands/textmaker');
 const { handleAntideleteCommand, handleMessageRevocation, storeMessage } = require('./commands/antidelete');
 const clearTmpCommand = require('./commands/cleartmp');
+const setProfilePicture = require('./commands/setpp');
 
 // Global settings
 global.packname = settings.packname;
@@ -752,8 +753,8 @@ async function handleMessages(sock, messageUpdate, printLog) {
              case userMessage === '.cleartmp':
                 await clearTmpCommand(sock, chatId, message);
                 break;
-            case userMessage === '.cleartmp':
-                await clearTmpCommand(sock, chatId, message);
+            case userMessage === '.setpp':
+                await setProfilePicture(sock, chatId, message);
                 break;
             default:
                 if (isGroup) {
