@@ -78,6 +78,7 @@ const pairCommand = require('./commands/pair');
 const stickerTelegramCommand = require('./commands/stickertelegram');
 const textmakerCommand = require('./commands/textmaker');
 const { handleAntideleteCommand, handleMessageRevocation, storeMessage } = require('./commands/antidelete');
+const clearTmpCommand = require('./commands/cleartmp');
 
 // Global settings
 global.packname = settings.packname;
@@ -747,6 +748,12 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage === '.surrender':
                 // Handle surrender command for tictactoe game
                 await handleTicTacToeMove(sock, chatId, senderId, 'surrender');
+                break;
+             case userMessage === '.cleartmp':
+                await clearTmpCommand(sock, chatId, message);
+                break;
+            case userMessage === '.cleartmp':
+                await clearTmpCommand(sock, chatId, message);
                 break;
             default:
                 if (isGroup) {

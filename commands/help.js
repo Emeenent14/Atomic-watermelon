@@ -71,6 +71,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .autostatus
 ║ ➤ .clearsession
 ║ ➤ .antidelete
+║ ➤ .cleartmp
 ╚═══════════════════╝
 
 ╔═══════════════════╗
