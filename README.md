@@ -35,13 +35,13 @@ Click the button below to fork the Knight Bot repository to your GitHub account:
 Deploy the bot and easily connect it to your WhatsApp account by pair code. Click the button below to deploy the bot on Replit.
 
 <div align="center">
-  <a href="https://replit.com/@DGXeon/Xeon-PairCode?v=1">
+  <a href="https://replit.com/@DGXeon/Xeon-PairCode?v=1" target="_blank">
     <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Replit-success?style=for-the-badge" alt="Deploy on Replit"/>
   </a>
 </div>
 
 <div align="center">
-  <a href="https://knight-bot-paircode.onrender.com">
+  <a href="https://knight-bot-paircode.onrender.com" target="_blank">
     <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Easy%20Method-ff4d4d?style=for-the-badge" alt="Generate Pair Code"/>
   </a>
 </div>
