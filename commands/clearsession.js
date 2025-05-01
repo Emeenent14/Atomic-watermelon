@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const isOwner = require('../lib/isOwner');
 
 const channelInfo = {
     contextInfo: {
@@ -15,10 +14,10 @@ const channelInfo = {
     }
 };
 
-async function clearSessionCommand(sock, chatId, senderId) {
+async function clearSessionCommand(sock, chatId, msg) {
     try {
         // Check if sender is owner
-        if (!isOwner(senderId)) {
+        if (!msg.key.fromMe) {
             await sock.sendMessage(chatId, { 
                 text: '❌ This command can only be used by the owner!',
                 ...channelInfo
@@ -58,73 +57,35 @@ async function clearSessionCommand(sock, chatId, senderId) {
             if (file.startsWith('pre-key-')) preKeyCount++;
         }
 
+        // Delete files
         for (const file of files) {
             try {
-                // Skip protected files
-                if (file === 'creds.json') {
-                    continue;
-                }
-
                 const filePath = path.join(sessionDir, file);
-                if (!fs.statSync(filePath).isFile()) continue;
-
-                // Optimize app-state-sync files (keep only latest 3)
-                if (file.startsWith('app-state-sync-')) {
-                    if (appStateSyncCount > 3) {
-                        fs.unlinkSync(filePath);
-                        filesCleared++;
-                        appStateSyncCount--;
-                    }
-                    continue;
-                }
-
-                // Optimize pre-key files (keep only latest 5)
-                if (file.startsWith('pre-key-')) {
-                    if (preKeyCount > 5) {
-                        fs.unlinkSync(filePath);
-                        filesCleared++;
-                        preKeyCount--;
-                    }
-                    continue;
-                }
-
-                // Clear old sender-key files
-                if (file.startsWith('sender-key-')) {
-                    const stats = fs.statSync(filePath);
-                    const fileAge = Date.now() - stats.mtimeMs;
-                    // Clear only if older than 6 hours
-                    if (fileAge > 21600000) {
-                        fs.unlinkSync(filePath);
-                        filesCleared++;
-                    }
-                }
-
-            } catch (err) {
-                console.error('Error processing file:', file, err);
+                fs.unlinkSync(filePath);
+                filesCleared++;
+            } catch (error) {
                 errors++;
-                errorDetails.push(`${file}: ${err.message}`);
+                errorDetails.push(`Failed to delete ${file}: ${error.message}`);
             }
         }
 
-        // Send optimized success message
-        let resultMessage = `✨ *Session Optimization Complete*\n\n` +
-                          `🔄 Files optimized: ${filesCleared}\n` +
-                          `⚡ Bot performance improved!\n\n` +
-                          `*Note:* Bot will maintain faster response times now.`;
-
-        if (errors > 0) {
-            resultMessage += `\n\n⚠️ Skipped ${errors} file(s) for safety.`;
-        }
+        // Send completion message
+        const message = `✅ Session files cleared successfully!\n\n` +
+                       `📊 Statistics:\n` +
+                       `• Total files cleared: ${filesCleared}\n` +
+                       `• App state sync files: ${appStateSyncCount}\n` +
+                       `• Pre-key files: ${preKeyCount}\n` +
+                       (errors > 0 ? `\n⚠️ Errors encountered: ${errors}\n${errorDetails.join('\n')}` : '');
 
         await sock.sendMessage(chatId, { 
-            text: resultMessage,
+            text: message,
             ...channelInfo
         });
 
     } catch (error) {
         console.error('Error in clearsession command:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Error occurred while optimizing sessions!\n' + error.message,
+            text: '❌ Failed to clear session files!',
             ...channelInfo
         });
     }

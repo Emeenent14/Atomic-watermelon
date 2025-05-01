@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const isOwner = require('../lib/isOwner');
 
 const channelInfo = {
     contextInfo: {
@@ -22,10 +21,10 @@ if (!fs.existsSync(configPath)) {
     fs.writeFileSync(configPath, JSON.stringify({ enabled: false }));
 }
 
-async function autoStatusCommand(sock, chatId, senderId, args) {
+async function autoStatusCommand(sock, chatId, msg, args) {
     try {
         // Check if sender is owner
-        if (!isOwner(senderId)) {
+        if (!msg.key.fromMe) {
             await sock.sendMessage(chatId, { 
                 text: '❌ This command can only be used by the owner!',
                 ...channelInfo

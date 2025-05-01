@@ -181,9 +181,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
         const adminCommands = ['.mute', '.unmute', '.ban', '.unban', '.promote', '.demote', '.kick', '.tagall', '.antilink'];
         const isAdminCommand = adminCommands.some(cmd => userMessage.startsWith(cmd));
 
+        // List of owner commands
+        const ownerCommands = ['.mode', '.autostatus', '.antidelete', '.cleartmp', '.setpp', '.clearsession'];
+        const isOwnerCommand = ownerCommands.some(cmd => userMessage.startsWith(cmd));
+
         let isSenderAdmin = false;
         let isBotAdmin = false;
 
+        // Check admin status only for admin commands in groups
         if (isGroup && isAdminCommand) {
             const adminStatus = await isAdmin(sock, chatId, senderId);
             isSenderAdmin = adminStatus.isSenderAdmin;
@@ -212,12 +217,23 @@ async function handleMessages(sock, messageUpdate, printLog) {
             }
         }
 
+        // Check owner status for owner commands
+        if (isOwnerCommand) {
+            // Check if message is from owner (fromMe) or bot itself
+            if (!message.key.fromMe) {
+                await sock.sendMessage(chatId, { 
+                    text: '❌ This command is only available for the owner!',
+                    ...channelInfo
+                });
+                return;
+            }
+        }
+
         // Add this near the start of your message handling logic, before processing commands
         try {
             const data = JSON.parse(fs.readFileSync('./data/messageCount.json'));
-            const senderNumber = senderId.split('@')[0];
             // Allow owner to use bot even in private mode
-            if (!data.isPublic && senderNumber !== settings.ownerNumber) {
+            if (!data.isPublic && !message.key.fromMe) {
                 return; // Silently ignore messages from non-owners when in private mode
             }
         } catch (error) {
@@ -282,9 +298,8 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 await attpCommand(sock, chatId, message);
                 break;
             case userMessage.startsWith('.mode'):
-                // Check if sender is the owner number from settings
-                const senderNumber = senderId.split('@')[0];
-                if (senderNumber !== settings.ownerNumber) {
+                // Check if sender is the owner
+                if (!message.key.fromMe) {
                     await sock.sendMessage(chatId, { text: 'Only bot owner can use this command!', ...channelInfo });
                     return;
                 }
@@ -316,6 +331,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     });
                     return;
                 }
+
                 try {
                     // Update access mode
                     data.isPublic = action === 'public';
@@ -674,11 +690,11 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 await viewOnceCommand(sock, chatId, message);
                 break;
             case userMessage === '.clearsession' || userMessage === '.clearsesi':
-                await clearSessionCommand(sock, chatId, senderId);
+                await clearSessionCommand(sock, chatId, message);
                 break;
             case userMessage.startsWith('.autostatus'):
                 const autoStatusArgs = userMessage.split(' ').slice(1);
-                await autoStatusCommand(sock, chatId, senderId, autoStatusArgs);
+                await autoStatusCommand(sock, chatId, message, autoStatusArgs);
                 break;
             case userMessage.startsWith('.simp'):
                 await simpCommand(sock, chatId, message);
@@ -750,7 +766,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 // Handle surrender command for tictactoe game
                 await handleTicTacToeMove(sock, chatId, senderId, 'surrender');
                 break;
-             case userMessage === '.cleartmp':
+            case userMessage === '.cleartmp':
                 await clearTmpCommand(sock, chatId, message);
                 break;
             case userMessage === '.setpp':
