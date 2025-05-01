@@ -122,7 +122,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
         const chatId = message.key.remoteJid;
         const senderId = message.key.participant || message.key.remoteJid;
         const isGroup = chatId.endsWith('@g.us');
-        
+
         let userMessage = message.message?.conversation?.trim().toLowerCase() ||
             message.message?.extendedTextMessage?.text?.trim().toLowerCase() || '';
         userMessage = userMessage.replace(/\.\s+/g, '.').trim();
@@ -135,8 +135,8 @@ async function handleMessages(sock, messageUpdate, printLog) {
         // Check if user is banned (skip ban check for unban command)
         if (isBanned(senderId) && !userMessage.startsWith('.unban')) {
             // Only respond occasionally to avoid spam
-            if (Math.random() < 0.1) { 
-                await sock.sendMessage(chatId, { 
+            if (Math.random() < 0.1) {
+                await sock.sendMessage(chatId, {
                     text: '❌ You are banned from using the bot. Contact an admin to get unbanned.',
                     ...channelInfo
                 });
@@ -150,14 +150,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
             return;
         }
 
-      /*  // Basic message response in private chat
-        if (!isGroup && (userMessage === 'hi' || userMessage === 'hello' || userMessage === 'bot' || userMessage === 'hlo' || userMessage === 'hey' || userMessage === 'bro')) {
-            await sock.sendMessage(chatId, {
-                text: 'Hi, How can I help you?\nYou can use .menu for more info and commands.',
-                ...channelInfo
-            });
-            return;
-        } */
+        /*  // Basic message response in private chat
+          if (!isGroup && (userMessage === 'hi' || userMessage === 'hello' || userMessage === 'bot' || userMessage === 'hlo' || userMessage === 'hey' || userMessage === 'bro')) {
+              await sock.sendMessage(chatId, {
+                  text: 'Hi, How can I help you?\nYou can use .menu for more info and commands.',
+                  ...channelInfo
+              });
+              return;
+          } */
 
         if (!message.key.fromMe) incrementMessageCount(chatId, senderId);
 
@@ -208,7 +208,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 userMessage.startsWith('.demote')
             ) {
                 if (!isSenderAdmin && !message.key.fromMe) {
-                    await sock.sendMessage(chatId, { 
+                    await sock.sendMessage(chatId, {
                         text: 'Sorry, only group admins can use this command.',
                         ...channelInfo
                     });
@@ -221,7 +221,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
         if (isOwnerCommand) {
             // Check if message is from owner (fromMe) or bot itself
             if (!message.key.fromMe) {
-                await sock.sendMessage(chatId, { 
+                await sock.sendMessage(chatId, {
                     text: '❌ This command is only available for the owner!',
                     ...channelInfo
                 });
@@ -276,7 +276,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage === '.help' || userMessage === '.menu' || userMessage === '.bot' || userMessage === '.list':
                 await helpCommand(sock, chatId, global.channelLink);
                 break;
-            case userMessage === '.sticker' || userMessage=== '.s':
+            case userMessage === '.sticker' || userMessage === '.s':
                 await stickerCommand(sock, chatId, message);
                 break;
             case userMessage.startsWith('.warnings'):
@@ -317,7 +317,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 // If no argument provided, show current status
                 if (!action) {
                     const currentMode = data.isPublic ? 'public' : 'private';
-                    await sock.sendMessage(chatId, { 
+                    await sock.sendMessage(chatId, {
                         text: `Current bot mode: *${currentMode}*\n\nUsage: .mode public/private\n\nExample:\n.mode public - Allow everyone to use bot\n.mode private - Restrict to owner only`,
                         ...channelInfo
                     });
@@ -325,7 +325,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 }
 
                 if (action !== 'public' && action !== 'private') {
-                    await sock.sendMessage(chatId, { 
+                    await sock.sendMessage(chatId, {
                         text: 'Usage: .mode public/private\n\nExample:\n.mode public - Allow everyone to use bot\n.mode private - Restrict to owner only',
                         ...channelInfo
                     });
@@ -335,10 +335,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 try {
                     // Update access mode
                     data.isPublic = action === 'public';
-                    
+
                     // Save updated data
                     fs.writeFileSync('./data/messageCount.json', JSON.stringify(data, null, 2));
-                    
+
                     await sock.sendMessage(chatId, { text: `Bot is now in *${action}* mode`, ...channelInfo });
                 } catch (error) {
                     console.error('Error updating access mode:', error);
@@ -362,16 +362,16 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 break;
             case userMessage.startsWith('.antilink'):
                 if (!isGroup) {
-                    await sock.sendMessage(chatId, { 
+                    await sock.sendMessage(chatId, {
                         text: 'This command can only be used in groups.',
-                        ...channelInfo 
+                        ...channelInfo
                     });
                     return;
                 }
                 if (!isBotAdmin) {
-                    await sock.sendMessage(chatId, { 
+                    await sock.sendMessage(chatId, {
                         text: 'Please make the bot an admin first.',
-                        ...channelInfo 
+                        ...channelInfo
                     });
                     return;
                 }
@@ -496,7 +496,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                         const adminStatus = await isAdmin(sock, chatId, senderId);
                         isSenderAdmin = adminStatus.isSenderAdmin;
                     }
-                    
+
                     if (isSenderAdmin || message.key.fromMe) {
                         await welcomeCommand(sock, chatId, message);
                     } else {
@@ -513,7 +513,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                         const adminStatus = await isAdmin(sock, chatId, senderId);
                         isSenderAdmin = adminStatus.isSenderAdmin;
                     }
-                    
+
                     if (isSenderAdmin || message.key.fromMe) {
                         await goodbyeCommand(sock, chatId, message);
                     } else {
@@ -535,16 +535,16 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     await sock.sendMessage(chatId, { text: 'This command can only be used in groups.', ...channelInfo });
                     return;
                 }
-                
+
                 const adminStatus = await isAdmin(sock, chatId, senderId);
                 isSenderAdmin = adminStatus.isSenderAdmin;
                 isBotAdmin = adminStatus.isBotAdmin;
-                
+
                 if (!isBotAdmin) {
                     await sock.sendMessage(chatId, { text: '*Bot must be admin to use this feature*', ...channelInfo });
                     return;
                 }
-                
+
                 await antibadwordCommand(sock, chatId, message, senderId, isSenderAdmin);
                 break;
             case userMessage.startsWith('.chatbot'):
@@ -552,14 +552,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     await sock.sendMessage(chatId, { text: 'This command can only be used in groups.', ...channelInfo });
                     return;
                 }
-                
+
                 // Check if sender is admin
                 const chatbotAdminStatus = await isAdmin(sock, chatId, senderId);
                 if (!chatbotAdminStatus.isSenderAdmin) {
                     await sock.sendMessage(chatId, { text: '*Only admins can use this command*', ...channelInfo });
                     return;
                 }
-                
+
                 const match = userMessage.slice(8).trim();
                 await handleChatbotCommand(sock, chatId, message, match);
                 break;
@@ -614,18 +614,18 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 try {
                     const text = userMessage.split(' ').slice(1).join(' ');
                     if (!text) {
-                        await sock.sendMessage(chatId, { 
+                        await sock.sendMessage(chatId, {
                             text: `✅ Please specify the song you want to download!\n\nExample: .play Sia Unstoppable`,
                             ...channelInfo
                         });
                         return;
                     }
 
-                 
+
 
                     const search = await yts(text);
                     if (!search.all || search.all.length === 0) {
-                        await sock.sendMessage(chatId, { 
+                        await sock.sendMessage(chatId, {
                             text: '❌ No results found!',
                             ...channelInfo
                         });
@@ -641,7 +641,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     // Fetch the audio data from the API
                     const response = await fetch(apiUrl);
                     if (!response.ok) {
-                        await sock.sendMessage(chatId, { 
+                        await sock.sendMessage(chatId, {
                             text: '❌ Failed to fetch data from the API. Please try again.',
                             ...channelInfo
                         });
@@ -671,16 +671,16 @@ async function handleMessages(sock, messageUpdate, printLog) {
                             mimetype: "audio/mp4"
                         });
 
-                    
+
 
                     } else {
-                        await sock.sendMessage(chatId, { 
+                        await sock.sendMessage(chatId, {
                             text: '❌ Unable to fetch the song. Please try again later.',
                             ...channelInfo
                         });
                     }
                 } catch (error) {
-                    await sock.sendMessage(chatId, { 
+                    await sock.sendMessage(chatId, {
                         text: `❌ An error occurred: ${error.message}`,
                         ...channelInfo
                     });
@@ -787,7 +787,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
         console.error('❌ Error in message handler:', error.message);
         // Only try to send error message if we have a valid chatId
         if (chatId) {
-            await sock.sendMessage(chatId, { 
+            await sock.sendMessage(chatId, {
                 text: '❌ Failed to process command!',
                 ...channelInfo
             });
@@ -796,17 +796,17 @@ async function handleMessages(sock, messageUpdate, printLog) {
 }
 
 // Instead, export the handlers along with handleMessages
-module.exports = { 
+module.exports = {
     handleMessages,
     handleGroupParticipantUpdate: async (sock, update) => {
         const { id, participants, action, author } = update;
-      /*  console.log('Group Update in Main:', {
-            id,
-            participants,
-            action,
-            author
-        }); */ // Add this debug log
-        
+        /*  console.log('Group Update in Main:', {
+              id,
+              participants,
+              action,
+              author
+          }); */ // Add this debug log
+
         if (action === 'promote') {
             await handlePromotionEvent(sock, id, participants, author);
         } else if (action === 'demote') {
