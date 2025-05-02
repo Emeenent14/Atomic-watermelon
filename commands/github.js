@@ -13,7 +13,7 @@ _Star ⭐ the repository if you like the bot!_`;
         await sock.sendMessage(chatId, {
             text: repoInfo,
             contextInfo: {
-                forwardingScore: 999,
+                forwardingScore: 1,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363161513685998@newsletter',

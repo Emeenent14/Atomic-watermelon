@@ -34,7 +34,7 @@ async function simpCommand(sock, chatId, quotedMsg, mentionedJid, sender) {
             image: imageBuffer,
             caption: '*your religion is simping*',
             contextInfo: {
-                forwardingScore: 999,
+                forwardingScore: 1,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363161513685998@newsletter',
@@ -49,7 +49,7 @@ async function simpCommand(sock, chatId, quotedMsg, mentionedJid, sender) {
         await sock.sendMessage(chatId, { 
             text: '❌ Sorry, I couldn\'t generate the simp card. Please try again later!',
             contextInfo: {
-                forwardingScore: 999,
+                forwardingScore: 1,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363161513685998@newsletter',

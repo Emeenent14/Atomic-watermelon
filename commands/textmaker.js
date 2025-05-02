@@ -3,7 +3,7 @@ const mumaker = require('mumaker');
 
 // Base channel info template
 const channelInfo = {
-    forwardingScore: 999,
+    forwardingScore: 1,
     isForwarded: true,
     forwardedNewsletterMessageInfo: {
         newsletterJid: '120363161513685998@newsletter',

@@ -6,7 +6,7 @@ const path = require('path');
 // Channel info for message context
 const channelInfo = {
     contextInfo: {
-        forwardingScore: 999,
+        forwardingScore: 1,
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
             newsletterJid: '120363161513685998@newsletter',

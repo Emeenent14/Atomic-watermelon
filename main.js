@@ -93,7 +93,7 @@ global.ytch = "Mr Unique Hacker";
 // Add this near the top of main.js with other global configurations
 const channelInfo = {
     contextInfo: {
-        forwardingScore: 999,
+        forwardingScore: 1,
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
             newsletterJid: '120363161513685998@newsletter',
