@@ -135,6 +135,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .song <song_name>
 ║ ➤ .instagram <link>
 ║ ➤ .facebook <link>
+║ ➤ .tiktok <link>
 ╚═══════════════════╝
 
 Join our channel for updates:`;
