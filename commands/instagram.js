@@ -1,7 +1,23 @@
 const { igdl } = require("ruhend-scraper");
 
+// Store processed message IDs to prevent duplicates
+const processedMessages = new Set();
+
 async function instagramCommand(sock, chatId, message) {
     try {
+        // Check if message has already been processed
+        if (processedMessages.has(message.key.id)) {
+            return;
+        }
+        
+        // Add message ID to processed set
+        processedMessages.add(message.key.id);
+        
+        // Clean up old message IDs after 5 minutes
+        setTimeout(() => {
+            processedMessages.delete(message.key.id);
+        }, 5 * 60 * 1000);
+
         const text = message.message?.conversation || message.message?.extendedTextMessage?.text;
         
         if (!text) {
@@ -35,20 +51,33 @@ async function instagramCommand(sock, chatId, message) {
         
         if (!downloadData || !downloadData.data || downloadData.data.length === 0) {
             return await sock.sendMessage(chatId, { 
-                text: "No video found at the provided link."
+                text: "No media found at the provided link."
             });
         }
 
-        const videoData = downloadData.data;
-        for (let i = 0; i < Math.min(20, videoData.length); i++) {
-            const video = videoData[i];
-            const videoUrl = video.url;
+        const mediaData = downloadData.data;
+        for (let i = 0; i < Math.min(20, mediaData.length); i++) {
+            const media = mediaData[i];
+            const mediaUrl = media.url;
 
-            await sock.sendMessage(chatId, {
-                video: { url: videoUrl },
-                mimetype: "video/mp4",
-                caption: "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧"
-            }, { quoted: message });
+            // Check if URL ends with common video extensions
+            const isVideo = /\.(mp4|mov|avi|mkv|webm)$/i.test(mediaUrl) || 
+                          media.type === 'video' || 
+                          text.includes('/reel/') || 
+                          text.includes('/tv/');
+
+            if (isVideo) {
+                await sock.sendMessage(chatId, {
+                    video: { url: mediaUrl },
+                    mimetype: "video/mp4",
+                    caption: "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧"
+                }, { quoted: message });
+            } else {
+                await sock.sendMessage(chatId, {
+                    image: { url: mediaUrl },
+                    caption: "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧"
+                }, { quoted: message });
+            }
         }
     } catch (error) {
         console.error('Error in Instagram command:', error);
