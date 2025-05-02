@@ -81,6 +81,7 @@ const { handleAntideleteCommand, handleMessageRevocation, storeMessage } = requi
 const clearTmpCommand = require('./commands/cleartmp');
 const setProfilePicture = require('./commands/setpp');
 const instagramCommand = require('./commands/instagram');
+const facebookCommand = require('./commands/facebook');
 
 // Global settings
 global.packname = settings.packname;
@@ -775,6 +776,9 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 break;
             case userMessage.startsWith('.instagram') || userMessage.startsWith('.igdl') || userMessage.startsWith('.ig'):
                 await instagramCommand(sock, chatId, message);
+                break;
+            case userMessage.startsWith('.fb') || userMessage.startsWith('.facebook'):
+                await facebookCommand(sock, chatId, message);
                 break;
             default:
                 if (isGroup) {
