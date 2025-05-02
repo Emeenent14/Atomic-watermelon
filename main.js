@@ -82,6 +82,7 @@ const clearTmpCommand = require('./commands/cleartmp');
 const setProfilePicture = require('./commands/setpp');
 const instagramCommand = require('./commands/instagram');
 const facebookCommand = require('./commands/facebook');
+const playCommand = require('./commands/play');
 
 // Global settings
 global.packname = settings.packname;
@@ -612,82 +613,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage.startsWith('.tg') || userMessage.startsWith('.stickertelegram') || userMessage.startsWith('.tgsticker') || userMessage.startsWith('.telesticker'):
                 await stickerTelegramCommand(sock, chatId, message);
                 break;
-            case userMessage.startsWith('.play') || userMessage.startsWith('.song') || userMessage.startsWith('.mp3') || userMessage.startsWith('.ytmp3') || userMessage.startsWith('.yts'):
-                try {
-                    const text = userMessage.split(' ').slice(1).join(' ');
-                    if (!text) {
-                        await sock.sendMessage(chatId, {
-                            text: `✅ Please specify the song you want to download!\n\nExample: .play Sia Unstoppable`,
-                            ...channelInfo
-                        });
-                        return;
-                    }
-
-
-
-                    const search = await yts(text);
-                    if (!search.all || search.all.length === 0) {
-                        await sock.sendMessage(chatId, {
-                            text: '❌ No results found!',
-                            ...channelInfo
-                        });
-                        return;
-                    }
-
-                    const video = search.all[0];
-                    const link = video.url;
-
-                    // Generate the API URL
-                    const apiUrl = `https://apis-keith.vercel.app/download/dlmp3?url=${link}`;
-
-                    // Fetch the audio data from the API
-                    const response = await fetch(apiUrl);
-                    if (!response.ok) {
-                        await sock.sendMessage(chatId, {
-                            text: '❌ Failed to fetch data from the API. Please try again.',
-                            ...channelInfo
-                        });
-                        return;
-                    }
-
-                    const data = await response.json();
-
-                    if (data.status && data.result) {
-                        const { title, downloadUrl, format, quality } = data.result;
-                        const thumbnail = video.thumbnail;
-
-                        // Send a message with song details and thumbnail
-                        await sock.sendMessage(chatId, {
-                            image: { url: thumbnail },
-                            caption: `
-╭═════════════════⊷
-║ *Title*: ${title}
-╰═════════════════⊷
-*🎵 Downloading song...*`,
-                            ...channelInfo
-                        });
-
-                        // Send the audio file
-                        await sock.sendMessage(chatId, {
-                            audio: { url: downloadUrl },
-                            mimetype: "audio/mp4"
-                        });
-
-
-
-                    } else {
-                        await sock.sendMessage(chatId, {
-                            text: '❌ Unable to fetch the song. Please try again later.',
-                            ...channelInfo
-                        });
-                    }
-                } catch (error) {
-                    await sock.sendMessage(chatId, {
-                        text: `❌ An error occurred: ${error.message}`,
-                        ...channelInfo
-                    });
-                }
-                break;
+           
             case userMessage === '.vv':
                 await viewOnceCommand(sock, chatId, message);
                 break;
@@ -779,6 +705,9 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 break;
             case userMessage.startsWith('.fb') || userMessage.startsWith('.facebook'):
                 await facebookCommand(sock, chatId, message);
+                break;
+            case userMessage.startsWith('.play') || userMessage.startsWith('.song') || userMessage.startsWith('.mp3') || userMessage.startsWith('.ytmp3') || userMessage.startsWith('.yts'):
+                await playCommand(sock, chatId, message);
                 break;
             default:
                 if (isGroup) {
