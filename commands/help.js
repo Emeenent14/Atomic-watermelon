@@ -133,6 +133,7 @@ async function helpCommand(sock, chatId, channelLink) {
 🎯 *Downloader*:
 ║ ➤ .play <song_name>
 ║ ➤ .song <song_name>
+║ ➤ .instagram <link>
 ╚═══════════════════╝
 
 Join our channel for updates:`;
