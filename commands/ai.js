@@ -61,12 +61,11 @@ async function aiCommand(sock, chatId, message) {
                         if (data.message || data.data || data.answer || data.result) {
                             const answer = data.message || data.data || data.answer || data.result;
                             await sock.sendMessage(chatId, {
-                                text: answer,
-                                contextInfo: {
-                                    mentionedJid: [message.key.participant || message.key.remoteJid],
-                                    quotedMessage: message.message
-                                }
+                                text: answer
+                            }, {
+                                quoted: message
                             });
+                            
                             return;
                         }
                     } catch (e) {
