@@ -96,6 +96,12 @@ async function helpCommand(sock, chatId, channelLink) {
 ╚═══════════════════╝
 
 ╔═══════════════════╗
+🤖 *AI Commands*:
+║ ➤ .gpt <question>
+║ ➤ .gemini <question>
+╚═══════════════════╝
+
+╔═══════════════════╗
 🎯 *Fun Commands*:
 ║ ➤ .compliment @user
 ║ ➤ .insult @user

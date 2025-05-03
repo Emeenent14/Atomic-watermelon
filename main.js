@@ -85,6 +85,8 @@ const facebookCommand = require('./commands/facebook');
 const playCommand = require('./commands/play');
 const tiktokCommand = require('./commands/tiktok');
 const songCommand = require('./commands/song');
+const aiCommand = require('./commands/ai');
+
 
 // Global settings
 global.packname = settings.packname;
@@ -708,7 +710,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage.startsWith('.fb') || userMessage.startsWith('.facebook'):
                 await facebookCommand(sock, chatId, message);
                 break;
-            case userMessage.startsWith('.song') || userMessage.startsWith('.music')  :
+            case userMessage.startsWith('.song') || userMessage.startsWith('.music'):
                 await playCommand(sock, chatId, message);
                 break;
             case userMessage.startsWith('.play') || userMessage.startsWith('.mp3') || userMessage.startsWith('.ytmp3') || userMessage.startsWith('.yts'):
@@ -716,6 +718,9 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 break;
             case userMessage.startsWith('.tiktok') || userMessage.startsWith('.tt'):
                 await tiktokCommand(sock, chatId, message);
+                break;
+            case userMessage.startsWith('.gpt') || userMessage.startsWith('.gemini'):
+                await aiCommand(sock, chatId, message);
                 break;
             default:
                 if (isGroup) {
