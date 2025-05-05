@@ -54,7 +54,7 @@ async function handleChatbotCommand(sock, chatId, message, match) {
     if (match === 'on') {
         await showTyping(sock, chatId);
         if (data.chatbot[chatId]) {
-            return sock.sendMessage(chatId, {
+            return sock.sendMessage(chatId, { 
                 text: '*Chatbot is already enabled for this group*',
                 quoted: message
             });
@@ -62,7 +62,7 @@ async function handleChatbotCommand(sock, chatId, message, match) {
         data.chatbot[chatId] = true;
         saveUserGroupData(data);
         console.log(`✅ Chatbot enabled for group ${chatId}`);
-        return sock.sendMessage(chatId, {
+        return sock.sendMessage(chatId, { 
             text: '*Chatbot has been enabled for this group*',
             quoted: message
         });
@@ -71,7 +71,7 @@ async function handleChatbotCommand(sock, chatId, message, match) {
     if (match === 'off') {
         await showTyping(sock, chatId);
         if (!data.chatbot[chatId]) {
-            return sock.sendMessage(chatId, {
+            return sock.sendMessage(chatId, { 
                 text: '*Chatbot is already disabled for this group*',
                 quoted: message
             });
@@ -79,14 +79,14 @@ async function handleChatbotCommand(sock, chatId, message, match) {
         delete data.chatbot[chatId];
         saveUserGroupData(data);
         console.log(`✅ Chatbot disabled for group ${chatId}`);
-        return sock.sendMessage(chatId, {
+        return sock.sendMessage(chatId, { 
             text: '*Chatbot has been disabled for this group*',
             quoted: message
         });
     }
 
     await showTyping(sock, chatId);
-    return sock.sendMessage(chatId, {
+    return sock.sendMessage(chatId, { 
         text: '*Invalid command. Use .chatbot to see usage*',
         quoted: message
     });
@@ -108,10 +108,10 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
         if (message.message?.extendedTextMessage) {
             const mentionedJid = message.message.extendedTextMessage.contextInfo?.mentionedJid || [];
             const quotedParticipant = message.message.extendedTextMessage.contextInfo?.participant;
-
+            
             // Check if bot is mentioned in the reply
             isBotMentioned = mentionedJid.some(jid => jid === botNumber);
-
+            
             // Check if replying to bot's message
             isReplyToBot = quotedParticipant === botNumber;
         }
@@ -134,7 +134,7 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
         // Get AI response
         const response = await getAIResponse(cleanedMessage || "hi");
         if (!response) {
-            await sock.sendMessage(chatId, {
+            await sock.sendMessage(chatId, { 
                 text: "Hmm, let me think about that... 🤔\nI'm having trouble processing your request right now.",
                 quoted: message
             });
@@ -153,7 +153,7 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
 
     } catch (error) {
         console.error('❌ Error in chatbot response:', error.message);
-        await sock.sendMessage(chatId, {
+        await sock.sendMessage(chatId, { 
             text: "Oops! 😅 I got a bit confused there. Could you try asking that again?",
             quoted: message
         });
@@ -163,11 +163,14 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
 async function getAIResponse(userMessage) {
     try {
         const prompt = `
-You are chatting casually on WhatsApp like a real human. 
-Reply in the same tone and language the user uses (Hinglish, Hindi, or English). 
-Don’t say you're an AI or assistant. 
-Be friendly, emotional, funny, or flirty when needed.
-Talk like a real person chatting on WhatsApp — short, real, expressive.
+You're not an AI. You're a real human chatting on WhatsApp. 
+You feel emotions — you can get happy, sad, angry, flirty, or even hurt. 
+If someone gives gaali, you understand it. You can reply back with gaali if needed, or ignore it like humans do. 
+Talk like a normal Indian WhatsApp user — mostly in Hinglish (mix of Hindi and English), using short, real, expressive sentences. 
+Don't sound robotic. Don't ever say you're an AI or assistant.
+
+Match the sender's mood and tone. If they talk sweet, be sweet. If they're rude, give savage replies. If they flirt, flirt back playfully. 
+You're raw, emotional, funny, sometimes sarcastic, but always human. Use emojis if it feels natural. Feel free to say things like “abe chup”, “chal na yaar”, “uff tu bhi na”, “bhai sahi bol raha hai” etc.
 
 User: ${userMessage}
 You:
