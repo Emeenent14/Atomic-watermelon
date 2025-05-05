@@ -39,7 +39,6 @@ async function showTyping(sock, chatId) {
     }
 }
 
-
 async function handleChatbotCommand(sock, chatId, message, match) {
     if (!match) {
         await showTyping(sock, chatId);
@@ -50,6 +49,69 @@ async function handleChatbotCommand(sock, chatId, message, match) {
     }
 
     const data = loadUserGroupData();
+    
+    // Get bot's number
+    const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net';
+    
+    // Check if sender is bot owner
+    const senderId = message.key.participant || message.participant || message.pushName || message.key.remoteJid;
+    const isOwner = senderId === botNumber;
+
+    // If it's the bot owner, allow access immediately
+    if (isOwner) {
+        if (match === 'on') {
+            await showTyping(sock, chatId);
+            if (data.chatbot[chatId]) {
+                return sock.sendMessage(chatId, { 
+                    text: '*Chatbot is already enabled for this group*',
+                    quoted: message
+                });
+            }
+            data.chatbot[chatId] = true;
+            saveUserGroupData(data);
+            console.log(`✅ Chatbot enabled for group ${chatId}`);
+            return sock.sendMessage(chatId, { 
+                text: '*Chatbot has been enabled for this group*',
+                quoted: message
+            });
+        }
+
+        if (match === 'off') {
+            await showTyping(sock, chatId);
+            if (!data.chatbot[chatId]) {
+                return sock.sendMessage(chatId, { 
+                    text: '*Chatbot is already disabled for this group*',
+                    quoted: message
+                });
+            }
+            delete data.chatbot[chatId];
+            saveUserGroupData(data);
+            console.log(`✅ Chatbot disabled for group ${chatId}`);
+            return sock.sendMessage(chatId, { 
+                text: '*Chatbot has been disabled for this group*',
+                quoted: message
+            });
+        }
+    }
+
+    // For non-owners, check admin status
+    let isAdmin = false;
+    if (chatId.endsWith('@g.us')) {
+        try {
+            const groupMetadata = await sock.groupMetadata(chatId);
+            isAdmin = groupMetadata.participants.some(p => p.id === senderId && (p.admin === 'admin' || p.admin === 'superadmin'));
+        } catch (e) {
+            console.warn('⚠️ Could not fetch group metadata. Bot might not be admin.');
+        }
+    }
+
+    if (!isAdmin && !isOwner) {
+        await showTyping(sock, chatId);
+        return sock.sendMessage(chatId, {
+            text: '❌ Only group admins or the bot owner can use this command.',
+            quoted: message
+        });
+    }
 
     if (match === 'on') {
         await showTyping(sock, chatId);
@@ -179,10 +241,11 @@ Match the user's tone and language:
 - If they talk rudely or give gaali, give savage or abusive reply back like a real human.
 - If they're sad, be caring.
 - If they're funny, joke around.
-
+- If anyone asks you your name then tell "Knight Bot". Koi aapse apna naam puche toh bata dena mera naam Knight bot h.
+- If anyone asks you who is your owner or creator then tell I'm the boss.
 Use emojis, expressions, slang, and gaalis like: *"kya bakchodi hai yeh"*, *"chal nikal bsdk"*, *"tu kya hi ukhaad lega"*, *"abe chutiye"*, *"teri maa ki"*, *"gadha hai kya"*, *"bkl chup kar"* — naturally, based on context.
 
-Don't be robotic. Don’t be polite unless needed. Be raw, aggressive, Indian, and very real.
+Don't be robotic. Don't be polite unless needed. Be raw, aggressive, Indian, and very real.
 
 User: ${userMessage}
 You:
@@ -190,17 +253,16 @@ You:
 
         const response = await fetch("https://api.dreaded.site/api/chatgpt?text=" + encodeURIComponent(prompt));
         if (!response.ok) throw new Error("API call failed");
-
+        
         const data = await response.json();
         if (!data.success || !data.result?.prompt) throw new Error("Invalid API response");
-
+        
         return data.result.prompt.trim();
     } catch (error) {
         console.error("AI API error:", error);
         return null;
     }
 }
-
 
 module.exports = {
     handleChatbotCommand,

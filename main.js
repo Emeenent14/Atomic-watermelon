@@ -561,10 +561,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     return;
                 }
 
-                // Check if sender is admin
+                // Check if sender is admin or bot owner
                 const chatbotAdminStatus = await isAdmin(sock, chatId, senderId);
-                if (!chatbotAdminStatus.isSenderAdmin) {
-                    await sock.sendMessage(chatId, { text: '*Only admins can use this command*', ...channelInfo });
+                if (!chatbotAdminStatus.isSenderAdmin && !message.key.fromMe) {
+                    await sock.sendMessage(chatId, { text: '*Only admins or bot owner can use this command*', ...channelInfo });
                     return;
                 }
 
