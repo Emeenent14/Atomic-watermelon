@@ -1,66 +1,101 @@
-const { setChatbot, getChatbot, removeChatbot } = require('../lib/index');
-const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
 
-// Load chatbot config
-function loadChatbotConfig(groupId) {
+const USER_GROUP_DATA = path.join(__dirname, '../data/userGroupData.json');
+
+// Load user group data
+function loadUserGroupData() {
     try {
-        const configPath = path.join(__dirname, '../data/chatbot.json');
-        if (!fs.existsSync(configPath)) {
-            return null;
-        }
-        const data = JSON.parse(fs.readFileSync(configPath));
-        return data[groupId];
+        return JSON.parse(fs.readFileSync(USER_GROUP_DATA));
     } catch (error) {
-        console.error('❌ Error loading chatbot config:', error.message);
-        return null;
+        console.error('❌ Error loading user group data:', error.message);
+        return { groups: [], chatbot: {} };
+    }
+}
+
+// Save user group data
+function saveUserGroupData(data) {
+    try {
+        fs.writeFileSync(USER_GROUP_DATA, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('❌ Error saving user group data:', error.message);
     }
 }
 
 async function handleChatbotCommand(sock, chatId, message, match) {
     if (!match) {
         return sock.sendMessage(chatId, {
-            text: `*CHATBOT SETUP*\n\n*.chatbot on*\nEnable chatbot\n\n*.chatbot off*\nDisable chatbot in this group`
+            text: `*CHATBOT SETUP*\n\n*.chatbot on*\nEnable chatbot\n\n*.chatbot off*\nDisable chatbot in this group`,
+            contextInfo: {
+                mentionedJid: [message.key.participant || message.key.remoteJid],
+                quotedMessage: message.message
+            }
         });
     }
 
+    const data = loadUserGroupData();
+
     if (match === 'on') {
-        const existingConfig = await getChatbot(chatId);
-        if (existingConfig?.enabled) {
-            return sock.sendMessage(chatId, { text: '*Chatbot is already enabled for this group*' });
+        if (data.chatbot[chatId]) {
+            return sock.sendMessage(chatId, { 
+                text: '*Chatbot is already enabled for this group*',
+                contextInfo: {
+                    mentionedJid: [message.key.participant || message.key.remoteJid],
+                    quotedMessage: message.message
+                }
+            });
         }
-        await setChatbot(chatId, true);
-        console.log(`✅ Chatbot settings updated for group ${chatId}`);
-        return sock.sendMessage(chatId, { text: '*Chatbot has been enabled for this group*' });
+        data.chatbot[chatId] = true;
+        saveUserGroupData(data);
+        console.log(`✅ Chatbot enabled for group ${chatId}`);
+        return sock.sendMessage(chatId, { 
+            text: '*Chatbot has been enabled for this group*',
+            contextInfo: {
+                mentionedJid: [message.key.participant || message.key.remoteJid],
+                quotedMessage: message.message
+            }
+        });
     }
 
     if (match === 'off') {
-        const config = await getChatbot(chatId);
-        if (!config?.enabled) {
-            return sock.sendMessage(chatId, { text: '*Chatbot is already disabled for this group*' });
+        if (!data.chatbot[chatId]) {
+            return sock.sendMessage(chatId, { 
+                text: '*Chatbot is already disabled for this group*',
+                contextInfo: {
+                    mentionedJid: [message.key.participant || message.key.remoteJid],
+                    quotedMessage: message.message
+                }
+            });
         }
-        await removeChatbot(chatId);
-        console.log(`✅ Chatbot settings updated for group ${chatId}`);
-        return sock.sendMessage(chatId, { text: '*Chatbot has been disabled for this group*' });
+        delete data.chatbot[chatId];
+        saveUserGroupData(data);
+        console.log(`✅ Chatbot disabled for group ${chatId}`);
+        return sock.sendMessage(chatId, { 
+            text: '*Chatbot has been disabled for this group*',
+            contextInfo: {
+                mentionedJid: [message.key.participant || message.key.remoteJid],
+                quotedMessage: message.message
+            }
+        });
     }
 
-    return sock.sendMessage(chatId, { text: '*Invalid command. Use .chatbot to see usage*' });
+    return sock.sendMessage(chatId, { 
+        text: '*Invalid command. Use .chatbot to see usage*',
+        contextInfo: {
+            mentionedJid: [message.key.participant || message.key.remoteJid],
+            quotedMessage: message.message
+        }
+    });
 }
 
 async function handleChatbotResponse(sock, chatId, message, userMessage, senderId) {
-    const config = loadChatbotConfig(chatId);
-    if (!config?.enabled) return;
+    const data = loadUserGroupData();
+    if (!data.chatbot[chatId]) return;
 
     try {
-        // Debug logs
-        console.log('Starting chatbot response handler');
-        console.log('Chat ID:', chatId);
-        console.log('User Message:', userMessage);
-
         // Get bot's ID
         const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-        console.log('Bot Number:', botNumber);
 
         // Check for mentions and replies
         let isBotMentioned = false;
@@ -76,23 +111,13 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
             
             // Check if replying to bot's message
             isReplyToBot = quotedParticipant === botNumber;
-            
-            console.log('Message is a reply with mention:', {
-                mentionedJid,
-                quotedParticipant,
-                isBotMentioned,
-                isReplyToBot
-            });
         }
         // Also check regular mentions in conversation
         else if (message.message?.conversation) {
             isBotMentioned = userMessage.includes(`@${botNumber.split('@')[0]}`);
         }
 
-        if (!isBotMentioned && !isReplyToBot) {
-            console.log('Bot not mentioned or replied to');
-            return;
-        }
+        if (!isBotMentioned && !isReplyToBot) return;
 
         // Clean the message
         let cleanedMessage = userMessage;
@@ -100,73 +125,52 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
             cleanedMessage = cleanedMessage.replace(new RegExp(`@${botNumber.split('@')[0]}`, 'g'), '').trim();
         }
 
-        // Get GPT-3 response
-        const response = await getGPT3Response(cleanedMessage || "hi");
-        console.log('GPT-3 Response:', response);
-
+        // Get AI response
+        const response = await getAIResponse(cleanedMessage || "hi");
         if (!response) {
             await sock.sendMessage(chatId, { 
                 text: "I couldn't process your request at the moment.",
-                quoted: message
+                contextInfo: {
+                    mentionedJid: [message.key.participant || message.key.remoteJid],
+                    quotedMessage: message.message
+                }
             });
             return;
         }
 
-        // Send response as a reply with mention
-        await sock.sendMessage(chatId, {
-            text: `@${senderId.split('@')[0]} ${response}`,
-            quoted: message,
-            mentions: [senderId]
-        });
+        // Send response as a reply with proper context
+await sock.sendMessage(chatId, {
+    text: response
+}, {
+    quoted: message
+});
 
-        // Only log successful responses
-        console.log(`✅ Chatbot responded in group ${chatId}`);
+
+
+
     } catch (error) {
         console.error('❌ Error in chatbot response:', error.message);
         await sock.sendMessage(chatId, { 
             text: "Sorry, I encountered an error while processing your message.",
-            quoted: message,
-            mentions: [senderId]
+            contextInfo: {
+                mentionedJid: [message.key.participant || message.key.remoteJid],
+                quotedMessage: message.message
+            }
         });
     }
 }
 
-async function getGPT3Response(userMessage) {
+async function getAIResponse(userMessage) {
     try {
-        console.log('Getting GPT-3 response for:', userMessage);
+        const response = await fetch("https://api.dreaded.site/api/chatgpt?text=" + encodeURIComponent(userMessage));
+        if (!response.ok) throw new Error("API call failed");
         
-        const systemPrompt = {
-            role: "system",
-            content: "You are KnightBot CHATBOT, an intelligent and feature-rich assistant. Behave like human and talk like human. Understand how sender responds, behaves accordingly. Enhance your responses with relevant emojis when appropriate while maintaining clarity and professionalism."
-        };
-
-        const userPrompt = {
-            role: "user",
-            content: userMessage
-        };
-
-        const response = await fetch("https://api.yanzbotz.live/api/ai/gpt3", {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ 
-                messages: [systemPrompt, userPrompt] 
-            })
-        });
-
-        if (!response.ok) {
-            console.error('GPT-3 API response not ok:', response.status);
-            throw new Error("API call failed");
-        }
-
         const data = await response.json();
-        console.log('GPT-3 API response:', data);
-        return data.result;
-
+        if (!data.success || !data.result?.prompt) throw new Error("Invalid API response");
+        
+        return data.result.prompt;
     } catch (error) {
-        console.error("GPT-3 API error:", error);
+        console.error("AI API error:", error);
         return null;
     }
 }
