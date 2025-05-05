@@ -61,6 +61,8 @@ async function handleAntideleteCommand(sock, chatId, message, match) {
 // Store incoming messages
 async function storeMessage(message) {
     try {
+        const config = loadAntideleteConfig();
+        if (!config.enabled) return; // Don't store if antidelete is disabled
         if (!message.key?.id) return;
 
         const messageId = message.key.id;
