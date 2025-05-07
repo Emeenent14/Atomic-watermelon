@@ -87,6 +87,8 @@ const playCommand = require('./commands/play');
 const tiktokCommand = require('./commands/tiktok');
 const songCommand = require('./commands/song');
 const aiCommand = require('./commands/ai');
+const { handleTranslateCommand } = require('./commands/translate');
+const { handleSsCommand } = require('./commands/ss');
 
 
 // Global settings
@@ -723,6 +725,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage.startsWith('.gpt') || userMessage.startsWith('.gemini'):
                 await aiCommand(sock, chatId, message);
                 break;
+            case userMessage.startsWith('.translate') || userMessage.startsWith('.trt'):
+                const commandLength = userMessage.startsWith('.translate') ? 10 : 4;
+                await handleTranslateCommand(sock, chatId, message, userMessage.slice(commandLength));
+                return;
+            case userMessage.startsWith('.ss') || userMessage.startsWith('.ssweb') || userMessage.startsWith('.screenshot'):
+                const ssCommandLength = userMessage.startsWith('.screenshot') ? 11 : (userMessage.startsWith('.ssweb') ? 6 : 3);
+                await handleSsCommand(sock, chatId, message, userMessage.slice(ssCommandLength).trim());
+                break;
             default:
                 if (isGroup) {
                     // Handle non-command group messages
@@ -749,14 +759,14 @@ async function handleMessages(sock, messageUpdate, printLog) {
 async function handleGroupParticipantUpdate(sock, update) {
     try {
         const { id, participants, action, author } = update;
-        
+
         // Debug log for group updates
-       /* console.log('Group Update in Main:', {
-            id,
-            participants,
-            action,
-            author
-        });*/
+        /* console.log('Group Update in Main:', {
+             id,
+             participants,
+             action,
+             author
+         });*/
 
         // Check if it's a group
         if (!id.endsWith('@g.us')) return;
@@ -766,7 +776,7 @@ async function handleGroupParticipantUpdate(sock, update) {
             await handlePromotionEvent(sock, id, participants, author);
             return;
         }
-        
+
         // Handle demotion events
         if (action === 'demote') {
             await handleDemotionEvent(sock, id, participants, author);
@@ -788,14 +798,14 @@ async function handleGroupParticipantUpdate(sock, update) {
             for (const participant of participants) {
                 const user = participant.split('@')[0];
                 const formattedMessage = welcomeMessage.replace('{user}', `@${user}`);
-                
+
                 await sock.sendMessage(id, {
                     text: formattedMessage,
                     mentions: [participant]
                 });
             }
         }
-        
+
         // Handle leave events
         if (action === 'remove') {
             // Check if goodbye is enabled for this group
@@ -811,7 +821,7 @@ async function handleGroupParticipantUpdate(sock, update) {
             for (const participant of participants) {
                 const user = participant.split('@')[0];
                 const formattedMessage = goodbyeMessage.replace('{user}', `@${user}`);
-                
+
                 await sock.sendMessage(id, {
                     text: formattedMessage,
                     mentions: [participant]

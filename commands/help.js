@@ -32,6 +32,8 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .staff or .admins 
 ║ ➤ .vv
 ║ ➤ .pair or .rent
+║ ➤ .trt <text> <lang>
+║ ➤ .ss <link>
 ╚═══════════════════╝ 
 
 ╔═══════════════════╗
