@@ -35,7 +35,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ╚═══════════════════╝ 
 
 ╔═══════════════════╗
-🛠️ *Admin Commands*:
+👮‍♂️ *Admin Commands*:
 ║ ➤ .ban @user
 ║ ➤ .promote @user
 ║ ➤ .demote @user
@@ -55,7 +55,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ╚═══════════════════╝
 
 ╔═══════════════════╗
-🛠️ *Owner Commands*:
+🔒 *Owner Commands*:
 ║ ➤ .mode
 ║ ➤ .autostatus
 ║ ➤ .clearsession
@@ -105,7 +105,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ╚═══════════════════╝
 
 ╔═══════════════════╗
-🎯 *Textmaker*:
+🔤 *Textmaker*:
 ║ ➤ .metallic <text>
 ║ ➤ .ice <text>
 ║ ➤ .snow <text>
@@ -127,7 +127,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ╚═══════════════════╝
 
 ╔═══════════════════╗
-🎯 *Downloader*:
+📥 *Downloader*:
 ║ ➤ .play <song_name>
 ║ ➤ .song <song_name>
 ║ ➤ .instagram <link>
@@ -136,7 +136,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ╚═══════════════════╝
 
 ╔═══════════════════╗
-🔗 *Github Commands:*
+💻 *Github Commands:*
 ║ ➤ .git
 ║ ➤ .github
 ║ ➤ .sc
