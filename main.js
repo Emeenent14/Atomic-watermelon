@@ -749,6 +749,11 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 }
                 break;
         }
+
+        if (userMessage.startsWith('.')) {
+            // After command is processed successfully
+            await addCommandReaction(sock, message);
+        }
     } catch (error) {
         console.error('❌ Error in message handler:', error.message);
         // Only try to send error message if we have a valid chatId
