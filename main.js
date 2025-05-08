@@ -138,6 +138,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
             message.message?.extendedTextMessage?.text?.trim().toLowerCase() || '';
         userMessage = userMessage.replace(/\.\s+/g, '.').trim();
 
+        // Preserve raw message for commands like .tag that need original casing
+        const rawText = message.message?.conversation?.trim() ||
+            message.message?.extendedTextMessage?.text?.trim() || '';
+
         // Only log command usage
         if (userMessage.startsWith('.')) {
             console.log(`📝 Command used in ${isGroup ? 'group' : 'private'}: ${userMessage}`);
@@ -367,7 +371,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 }
                 break;
             case userMessage.startsWith('.tag'):
-                const messageText = userMessage.slice(4).trim();
+                const messageText = rawText.slice(4).trim();  // use rawText here, not userMessage
                 const replyMessage = message.message?.extendedTextMessage?.contextInfo?.quotedMessage || null;
                 await tagCommand(sock, chatId, senderId, messageText, replyMessage);
                 break;
