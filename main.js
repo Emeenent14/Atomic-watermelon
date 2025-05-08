@@ -89,6 +89,7 @@ const songCommand = require('./commands/song');
 const aiCommand = require('./commands/ai');
 const { handleTranslateCommand } = require('./commands/translate');
 const { handleSsCommand } = require('./commands/ss');
+const { addCommandReaction, handleAreactCommand } = require('./lib/reactions');
 
 
 // Global settings
@@ -732,6 +733,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage.startsWith('.ss') || userMessage.startsWith('.ssweb') || userMessage.startsWith('.screenshot'):
                 const ssCommandLength = userMessage.startsWith('.screenshot') ? 11 : (userMessage.startsWith('.ssweb') ? 6 : 3);
                 await handleSsCommand(sock, chatId, message, userMessage.slice(ssCommandLength).trim());
+                break;
+            case userMessage.startsWith('.areact') || userMessage.startsWith('.autoreact') || userMessage.startsWith('.autoreaction'):
+                const isOwner = message.key.fromMe;
+                await handleAreactCommand(sock, chatId, message, isOwner);
                 break;
             default:
                 if (isGroup) {

@@ -64,6 +64,7 @@ async function helpCommand(sock, chatId, channelLink) {
 ║ ➤ .antidelete
 ║ ➤ .cleartmp
 ║ ➤ .setpp <reply to image>
+║ ➤ .autoreact
 ╚═══════════════════╝
 
 ╔═══════════════════╗
