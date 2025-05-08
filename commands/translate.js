@@ -57,7 +57,7 @@ async function handleTranslateCommand(sock, chatId, message, match) {
 
         // Send translation
         await sock.sendMessage(chatId, {
-            text: `${data.translated}}`,
+            text: `${data.translated}`,
         }, {
             quoted: message
         });
